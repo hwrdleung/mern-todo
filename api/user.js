@@ -1,14 +1,16 @@
 const User = require('../models/user');
-const Task = require('../models/task');
+const TaskSchema = require('../models/task');
+const mongoose = require('mongoose');
+const Task = mongoose.model('Task', TaskSchema);
 const express = require('express');
-const app = express();
+const router = express.Router();
 const ServerResponse = require('./serverResponse');
-const verifyToken = reuqire('./verifyToken)');
+const verifyToken = require('./verifyToken');
 
 // All end points here should require JWT verification
 
 // Create a new task
-app.post('/create-task', verifyToken, (req, res) => {
+router.post('/create-task', verifyToken, (req, res) => {
     // Find user in database
     User.findOne({_id: req._id}).then(user => {
         if(!user) {
@@ -18,9 +20,9 @@ app.post('/create-task', verifyToken, (req, res) => {
             // Add new task to users's task[] with data in req.body.task
             user.tasks.push(new Task({
                 creationDate: new Date(),
-                dueDate: req.body.task.dueDate,
-                subject: req.body.task.subject,
-                body: req.body.task.body,
+                dueDate: req.body.dueDate,
+                subject: req.body.subject,
+                body: req.body.body,
                 completed: false
             }))
 
@@ -33,7 +35,7 @@ app.post('/create-task', verifyToken, (req, res) => {
 });
 
 // Delete a task
-app.delete('/delete-task', verifyToken, (req, res) => {
+router.delete('/delete-task', verifyToken, (req, res) => {
     // Find user in database
     User.findOne({_id: req._id}).then(user => {
         if (!user) {
@@ -41,9 +43,9 @@ app.delete('/delete-task', verifyToken, (req, res) => {
             throw ('User not found.');
         } else {
         // Find task by taskID
-        for(let i = 0; i < user.tasks.length - 1; i++){
-            if(user.tasks[i]._id === req.body.task._id){
-                user.tasks[i].splice(i, 1);
+        for(let i = 0; i < user.tasks.length; i++){
+            if(user.tasks[i]._id.equals(req.body.taskId)){
+                user.tasks.splice(i, 1);
                 break;
             }
         }
@@ -55,7 +57,7 @@ app.delete('/delete-task', verifyToken, (req, res) => {
 });
 
 // Modify a task
-app.put('/modify-task', verifyToken, (req, res) => {
+router.put('/modify-task', verifyToken, (req, res) => {
       // Find user in database
       User.findOne({_id: req._id}).then(user => {
         if (!user) {
@@ -63,42 +65,49 @@ app.put('/modify-task', verifyToken, (req, res) => {
             throw ('User not found.');
         } else {
         // Find task by taskID
-        for(let i = 0; i < user.tasks.length - 1; i++){
-            if(user.tasks[i]._id === req.body.task._id){
-                user.tasks[i] = req.body.task;
+        for(let i = 0; i < user.tasks.length; i++){
+            if(user.tasks[i]._id.equals(req.body.taskId)){
+                console.log('task found')
+                user.tasks[i] = {...user.tasks[i], ...{
+                    creationDate: req.body.creationDate,
+                    dueDate: req.body.dueDate,
+                    body: req.body.body,
+                    subject: req.body.subject,
+                    completed: req.body.completed
+                }};
                 break;
             }
         }
         return user.save();
     }
     }).then(user => {
-        res.json(new ServerResponse(true, 'Task deleted.', user));
+        res.json(new ServerResponse(true, 'Task modified.', user));
     }).catch(error => console.log(error));
 });
 
 // Toggle task completion
-app.put('/toggle-completion', verifyToken, (req, res) => {
-    let task = req.body.task
+// router.put('/toggle-completion', verifyToken, (req, res) => {
+//     let task = req.body.task
 
-    User.findOne({ _id: req._id }).then(user => {
-        if (!user) {
-            res.json(new ServerResponse(false, 'User not found.'));
-            throw ('User not found.');
-        } else {
-            for (let i = 0; i < user.tasks.length; i++) {
-                if (user.tasks[i]._id === task._id) {
-                    user.tasks[i].completed = !user.tasks[i].completed;
-                    break;
-                }
-            }
-            return user.save();
-        }
-    }).then(user => {
-        return res.json(new ServerResponse(true, 'Toggled completion', user));
-    }).catch(error => console.log(error));
-});
+//     User.findOne({ _id: req._id }).then(user => {
+//         if (!user) {
+//             res.json(new ServerResponse(false, 'User not found.'));
+//             throw ('User not found.');
+//         } else {
+//             for (let i = 0; i < user.tasks.length; i++) {
+//                 if (user.tasks[i]._id === task._id) {
+//                     user.tasks[i].completed = !user.tasks[i].completed;
+//                     break;
+//                 }
+//             }
+//             return user.save();
+//         }
+//     }).then(user => {
+//         return res.json(new ServerResponse(true, 'Toggled completion', user));
+//     }).catch(error => console.log(error));
+// });
 
-app.get('/get-user-data', verifyToken, (req, res) => {
+router.get('/get-user-data', verifyToken, (req, res) => {
     User.findOne({ _id: req._id }).then(user => {
         if (!user) {
             res.json(new ServerResponse(false, 'User not found.'));
@@ -108,4 +117,6 @@ app.get('/get-user-data', verifyToken, (req, res) => {
         }
     }).catch(error => console.log(error));
 });
+
+module.exports = router;
 

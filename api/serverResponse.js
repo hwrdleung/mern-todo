@@ -1,8 +1,8 @@
-const ServerResponse = (success, message, payload) => {
+function ServerResponse(success, message, body) {
     return {
-        success : success,
-        message : message,
-        payload : payload
+        success: success,
+        message: message,
+        body: body
     }
 }
 

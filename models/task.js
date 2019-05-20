@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.schema;
+const Schema = mongoose.Schema;
 
 const TaskSchema = new Schema({
     creationDate: {type: Date, required: true},
@@ -9,4 +9,4 @@ const TaskSchema = new Schema({
     completed: {type: Boolean, required: true}
 });
 
-let Task = module.exports = mongoose.model('Task', TaskSchema);
+module.exports = TaskSchema;

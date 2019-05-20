@@ -10,7 +10,7 @@ function verifyToken(req, res, next) {
 
     try {
         // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.SECRET);
         // Add user from payload
         req._id = decoded;
         next();

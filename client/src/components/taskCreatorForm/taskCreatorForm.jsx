@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import { isRequired, isAlphaOnly } from '../formValidators';
+import { isRequired } from '../formValidators';
 import axios from 'axios';
 
 class TaskCreatorForm extends Component {
@@ -40,7 +40,7 @@ class TaskCreatorForm extends Component {
 
                 axios.post('/api/user/create-task', formData, { headers }).then(res => {
                     if(res.data.success){
-                        this.props.refreshTasks();
+                        this.props.refreshTasks(res.data.body.tasks);
                     }
                 })
             }

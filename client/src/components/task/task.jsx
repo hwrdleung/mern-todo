@@ -26,7 +26,7 @@ class Task extends Component {
         }
 
         axios.put('/api/user/toggle-completion', this.props.data, { headers }).then(res => {
-            if (res.data.success) this.props.refreshTasks();
+            if (res.data.success) this.props.refreshTasks(res.data.body.tasks);
         }).catch(error => console.log(error));
     }
 
@@ -38,13 +38,13 @@ class Task extends Component {
         }
 
         axios.post('/api/user/delete-task', this.props.data, { headers }).then(res => {
-            if (res.data.success) this.props.refreshTasks();
+            if (res.data.success) this.props.refreshTasks(res.data.body.tasks);
         })
     }
 
     render() {
         return (
-            <div className="flex-col-evenly shadow-sm my-sm width-100 clickable task-container"
+            <div className="flex-col-evenly shadow-sm bg-white my-sm width-100 clickable task-container"
                 onClick={() => this.toggleDetails()}>
 
                 <div className="flex-row-between mx-md">

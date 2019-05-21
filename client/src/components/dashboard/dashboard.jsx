@@ -24,9 +24,14 @@ class Dashboard extends Component {
 
         axios.get('/api/user/get-user-data', { headers }).then(res => {
             if (res.data.success) {
-                this.setState({ tasks: res.data.body.tasks })
+                this.setState({ tasks: res.data.body.tasks})
             }
         })
+    }
+
+    updateTasks = (tasks) => {
+        // Updats state with data passed up from child components
+        this.setState({tasks: tasks})
     }
 
     logout = () => {
@@ -34,13 +39,15 @@ class Dashboard extends Component {
         this.props.history.push('/');
     }
 
+
     renderTasks = () => {
         if(this.state.tasks.length === 0){
             return (<p className="mx-auto my-md italic">No tasks ...</p>)
+        } else {
+                return (this.state.tasks.map(task => (
+                    <Task key={task._id} data={task} refreshTasks={(data) => this.updateTasks(data)}></Task>
+                )))
         }
-        return (this.state.tasks.map(task => (
-            <Task key={task._id} data={task} refreshTasks={() => this.getUserData()}></Task>
-        )))
     }
 
     render() {
@@ -51,7 +58,7 @@ class Dashboard extends Component {
                 <h1 className="mx-auto my-lg">Simple Task List</h1>
 
                 <div className="flex-row-center mx-auto wrap">
-                    <div className="align-start my-md mx-md shadow-sm"><TaskCreatorForm refreshTasks={() => this.getUserData()} /></div>
+                    <div className="align-start my-md mx-md shadow-sm bg-white"><TaskCreatorForm refreshTasks={(data) => this.updateTasks(data)} /></div>
                     <div className="align-start flex-col-start mx-md width-500-px">
                         {this.renderTasks()}
                     </div>

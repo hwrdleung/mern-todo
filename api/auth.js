@@ -9,7 +9,7 @@ router.post('/register', (req, res) => {
     // Check for existing accounts with this username or email address
     Promise.all([
         User.findOne({ username: req.body.username }),
-        User.findOne({ email: req.body.email })
+        User.findOne({ email: req.body.emailAddress })
     ]).then(results => {
         if (results[0]) {
             res.json(new ServerResponse(false, 'This email address has already been used to create an account.'));
@@ -26,7 +26,7 @@ router.post('/register', (req, res) => {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             username: req.body.username,
-            email: req.body.email,
+            emailAddress: req.body.emailAddress,
             password: hash,
             tasks: []
         })
@@ -37,7 +37,10 @@ router.post('/register', (req, res) => {
             res.json(new ServerResponse(false, 'Registration unsuccessful.'));
             throw ('Registrsation unsuccessful');
         } else {
-            res.json(new ServerResponse(true, 'Registration successful', user));
+            res.json(new ServerResponse(true, 'Registration successful', {
+                user: user,
+                token: jwt.sign({ _id: user._id }, process.env.SECRET)
+            }));
         }
     }).catch(error => console.log(error));
 });
